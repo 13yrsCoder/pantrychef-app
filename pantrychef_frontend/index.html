@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>PantryChef - Find Recipes for Your Ingredients</title>
+</head>
+<body>
+
+
+    <header class="main-header">
+        <div class="container">
+            <a href="index.html" class="logo">PantryChef</a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html" class="active">Home</a></li>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <!-- Login/Sign Up links removed -->
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Got Leftovers? Let's Cook!</h1>
+            <p>Enter the ingredients you have, and we'll find delicious recipes for you.</p>
+
+            <!-- Form without action/method -->
+            <form id="ingredient-form" onsubmit="return false;"> <!-- Prevent default form submission -->
+                <input type="text" id="ingredient-input" placeholder="e.g., chicken, onion, tomato sauce">
+                <button type="button" id="add-ingredient-btn" class="btn">Add</button>
+            </form>
+            <div id="ingredients-list">
+                <!-- Added ingredients will appear here -->
+            </div>
+
+            <!-- Button triggers JS function -->
+            <button id="find-recipes-btn" class="btn btn-primary">Find Recipes Now!</button>
+            <p id="loading-indicator" style="display: none; margin-top: 10px;">Searching...</p>
+            <p id="error-message" style="color: red; display: none; margin-top: 10px;"></p>
+
+        </div>
+    </section>
+
+    <section id="how-it-works" class="section">
+        <div class="container">
+            <h2>How It Works</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <h3>1. Input Ingredients</h3>
+                    <p>Tell us what you have in your pantry, fridge, or leftover containers.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>2. Get Matches</h3>
+                    <p>Our smart system finds recipes that use your specific ingredients.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>3. Cook & Enjoy!</h3>
+                    <p>Reduce food waste, save money, and discover new favorite meals.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="featured-recipes" class="section">
+         <div class="container">
+             <h2>Featured Combinations</h2>
+             <div class="recipes-grid">
+                 <!-- Example Static Recipe Cards -->
+                 <div class="recipe-card">
+                     <img src="https://spoonacular.com/recipeImages/639487-312x231.jpg" alt="Creative Chicken & Broccoli">
+                     <h3>Creative Chicken & Broccoli</h3>
+                     <p>Uses: Chicken, Broccoli, Soy Sauce...</p>
+                     <div class="meta">
+                         <span>~30 mins</span>
+                         <span>Easy</span>
+                     </div>
+                     <!-- **** CHANGE THIS HREF **** -->
+                     <a href="recipe.html?id=639487" class="btn btn-secondary" style="margin-top: 10px;">View Recipe</a>
+                 </div>
+                  <div class="recipe-card">
+                     <img src="https://spoonacular.com/recipeImages/716437-312x231.jpg" alt="Unexpected Lentil Salad">
+                     <h3>Unexpected Lentil Salad</h3>
+                     <p>Uses: Lentils, Feta, Onion...</p>
+                      <div class="meta">
+                         <span>~20 mins</span>
+                         <span>Medium</span>
+                     </div>
+                      <!-- **** CHANGE THIS HREF **** -->
+                     <a href="recipe.html?id=716437" class="btn btn-secondary" style="margin-top: 10px;">View Recipe</a>
+                 </div>
+                  <div class="recipe-card">
+                     <img src="https://spoonacular.com/recipeImages/642401-312x231.jpg" alt="Quick Egg & Veggie Scramble">
+                     <h3>Quick Egg & Veggie Scramble</h3>
+                     <p>Uses: Eggs, Bell Pepper, Spinach...</p>
+                      <div class="meta">
+                         <span>~15 mins</span>
+                         <span>Easy</span>
+                     </div>
+                      <!-- **** CHANGE THIS HREF **** -->
+                     <a href="recipe.html?id=642401" class="btn btn-secondary" style="margin-top: 10px;">View Recipe</a>
+                 </div>
+             </div>
+         </div>
+     </section>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>© 2023 PantryChef. All Rights Reserved.</p>
+            <p>
+                <a href="#">Privacy Policy</a> |
+                <a href="#">Terms of Service</a> |
+                <a href="#">Contact</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Get references to HTML elements ---
+            const addBtn = document.getElementById('add-ingredient-btn');
+            const ingredientInput = document.getElementById('ingredient-input');
+            const ingredientsListDiv = document.getElementById('ingredients-list');
+            const findRecipesBtn = document.getElementById('find-recipes-btn');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const errorMessageElement = document.getElementById('error-message');
+
+            let ingredients = []; // Array to hold the added ingredients
+
+            // --- Functions ---
+            function renderIngredients() {
+                ingredientsListDiv.innerHTML = ''; // Clear current list
+                ingredients.forEach((ing, index) => {
+                    const span = document.createElement('span');
+                    span.textContent = ing;
+                    span.title = 'Click to remove';
+                    span.style.cursor = 'pointer';
+                    span.addEventListener('click', () => {
+                        ingredients.splice(index, 1);
+                        renderIngredients();
+                    });
+                    ingredientsListDiv.appendChild(span);
+                });
+                hideError(); // Clear errors when list changes
+            }
+
+            function showError(message) {
+                errorMessageElement.textContent = message;
+                errorMessageElement.style.display = 'block';
+                loadingIndicator.style.display = 'none';
+                findRecipesBtn.disabled = false;
+            }
+
+            function hideError() {
+                errorMessageElement.style.display = 'none';
+                errorMessageElement.textContent = '';
+            }
+
+            function handleAddIngredient() {
+                const ingredientText = ingredientInput.value.trim().toLowerCase();
+                if (ingredientText) {
+                    if (!ingredients.includes(ingredientText)) {
+                        ingredients.push(ingredientText);
+                        renderIngredients();
+                        ingredientInput.value = '';
+                    } else {
+                        alert('Ingredient already added!');
+                    }
+                    ingredientInput.focus();
+                }
+            }
+
+            async function handleFindRecipes() {
+                hideError();
+
+                if (ingredients.length === 0) {
+                    showError('Please add at least one ingredient!');
+                    return;
+                }
+
+                findRecipesBtn.disabled = true;
+                loadingIndicator.style.display = 'block';
+
+                const ingredientsQueryString = ingredients.join(',');
+                const encodedIngredients = encodeURIComponent(ingredientsQueryString);
+                // Using the specified backend URL
+                const apiUrl = `http://127.0.0.1:5001/api/find-recipes?ingredients=${encodedIngredients}`;
+
+                try {
+                    const response = await fetch(apiUrl);
+
+                    if (!response.ok) {
+                        let errorMsg = `Error fetching recipes (Status: ${response.status}).`;
+                        try {
+                            const errorData = await response.json();
+                            errorMsg = errorData.error || errorMsg;
+                        } catch (e) { /* Ignore if response isn't JSON */ }
+                        throw new Error(errorMsg);
+                    }
+
+                    const recipesData = await response.json();
+
+                    sessionStorage.setItem('recipeResults', JSON.stringify(recipesData));
+                    sessionStorage.setItem('searchedIngredients', ingredientsQueryString);
+
+                    window.location.href = 'results.html';
+
+                } catch (error) {
+                    console.error("Fetch Error:", error);
+                    showError(`Failed to get recipes: ${error.message}. Make sure the backend server is running.`);
+                    // Ensure button is re-enabled and loading hidden even if redirect fails or error occurs
+                    findRecipesBtn.disabled = false;
+                    loadingIndicator.style.display = 'none';
+                }
+            }
+
+            // --- Event Listeners ---
+            addBtn.addEventListener('click', handleAddIngredient);
+
+            ingredientInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddIngredient();
+                }
+            });
+
+            findRecipesBtn.addEventListener('click', handleFindRecipes);
+
+        }); // End of DOMContentLoaded
+    </script>
+</body>
+</html>

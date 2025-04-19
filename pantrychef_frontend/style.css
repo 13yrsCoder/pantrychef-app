@@ -1,0 +1,446 @@
+/* --- Global Resets & Base Styles --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f9f9f9;
+}
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+    overflow: hidden;
+    padding: 0 20px;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+ul {
+    list-style: none;
+}
+
+img {
+    max-width: 100%; /* Make images responsive */
+    height: auto;
+}
+
+/* --- Header & Navigation --- */
+.main-header {
+    background: #ffffff;
+    color: #333;
+    padding: 15px 0;
+    border-bottom: 1px solid #e0e0e0;
+    position: sticky; /* Make header sticky */
+    top: 0;
+    z-index: 1000;
+}
+
+.main-header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.main-header .logo {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #28a745; /* Green color for branding */
+}
+
+.main-nav ul {
+    display: flex;
+}
+
+.main-nav ul li {
+    margin-left: 20px;
+}
+
+.main-nav ul li a {
+    color: #333;
+    font-weight: 500;
+    padding: 5px 10px;
+    transition: color 0.3s ease;
+}
+
+.main-nav ul li a:hover,
+.main-nav ul li a.active {
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+}
+
+/* --- Footer --- */
+.main-footer {
+    background: #333;
+    color: #fff;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 40px;
+}
+
+.main-footer p {
+    margin-bottom: 10px;
+}
+
+.main-footer a {
+    color: #a0dfff;
+    margin: 0 10px;
+}
+
+/* --- Buttons --- */
+.btn {
+    display: inline-block;
+    background: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background: #0056b3;
+    text-decoration: none; /* Remove underline on hover for buttons */
+}
+
+.btn-primary {
+    background: #28a745; /* Green */
+}
+
+.btn-primary:hover {
+    background: #218838;
+}
+
+.btn-secondary {
+    background: #6c757d;
+}
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+/* --- Forms --- */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+/* --- Homepage Specific Styles --- */
+.hero {
+    background: #e9f5e9; /* Light green background */
+    padding: 60px 0;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.hero h1 {
+    font-size: 2.8em;
+    margin-bottom: 15px;
+    color: #28a745;
+}
+
+.hero p {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+    color: #555;
+}
+
+#ingredient-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* Space between input and button */
+    margin-bottom: 20px;
+}
+
+#ingredient-input {
+    width: 60%; /* Adjust width as needed */
+    max-width: 400px;
+    padding: 12px;
+    font-size: 1.1em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#add-ingredient-btn {
+    padding: 12px 20px;
+    font-size: 1.1em;
+}
+
+#ingredients-list {
+    margin-top: 15px;
+    margin-bottom: 30px;
+    min-height: 40px; /* So it doesn't collapse */
+}
+
+#ingredients-list span {
+    display: inline-block;
+    background-color: #d4edda; /* Bootstrap success light */
+    color: #155724; /* Bootstrap success dark */
+    padding: 5px 10px;
+    margin: 5px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    cursor: pointer; /* Indicate it can be removed */
+}
+
+#ingredients-list span:hover {
+    background-color: #c3e6cb;
+}
+
+
+.section {
+    padding: 40px 0;
+    text-align: center;
+}
+
+.section h2 {
+    font-size: 2em;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.features-grid, .recipes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid */
+    gap: 30px;
+    text-align: left;
+}
+
+.feature-item, .recipe-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.feature-item:hover, .recipe-card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-item h3 {
+    margin-bottom: 10px;
+    color: #007bff;
+}
+
+/* --- Recipe Card Styles (Used on Home & Results) --- */
+.recipe-card img {
+    width: 100%;
+    height: 180px; /* Fixed height for consistency */
+    object-fit: cover; /* Crop images nicely */
+    border-radius: 5px;
+    margin-bottom: 15px;
+    background-color: #eee; /* Placeholder background */
+}
+
+.recipe-card h3 {
+    font-size: 1.3em;
+    margin-bottom: 10px;
+}
+
+.recipe-card p {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.recipe-card .meta {
+    font-size: 0.8em;
+    color: #888;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* --- Results Page Specific Styles --- */
+.results-header {
+    padding: 30px 0;
+    background-color: #f1f1f1;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.results-header h1 {
+    margin-bottom: 10px;
+}
+
+.results-header p {
+    color: #555;
+}
+
+.filter-sort-section {
+    margin-bottom: 30px;
+    padding: 15px;
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+    gap: 15px;
+    align-items: center;
+}
+
+.filter-sort-section label {
+    margin-right: 5px;
+    font-weight: bold;
+}
+
+.filter-sort-section select,
+.filter-sort-section input[type="text"] {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+
+/* --- Recipe Detail Page Specific Styles --- */
+.recipe-detail-container {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-top: 30px;
+}
+
+.recipe-detail-header h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #28a745;
+}
+
+.recipe-image-main {
+    width: 100%;
+    max-height: 450px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    background-color: #eee; /* Placeholder background */
+}
+
+.recipe-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-around;
+    margin-bottom: 30px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.meta-item {
+    font-size: 0.95em;
+}
+
+.meta-item strong {
+    display: block;
+    color: #555;
+    margin-bottom: 3px;
+    font-size: 0.9em;
+    text-transform: uppercase;
+}
+
+.recipe-content {
+    display: grid;
+    grid-template-columns: 1fr; /* Default to single column */
+    gap: 40px;
+}
+
+/* Use two columns on wider screens */
+@media (min-width: 768px) {
+    .recipe-content {
+        grid-template-columns: 1fr 2fr; /* Ingredients smaller, Instructions larger */
+    }
+}
+
+
+.ingredients-section h2, .instructions-section h2 {
+    font-size: 1.6em;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #eee;
+}
+
+.ingredients-section ul, .instructions-section ol {
+    padding-left: 20px; /* Indent list items */
+}
+
+.ingredients-section ul li {
+    margin-bottom: 8px;
+    list-style: disc;
+}
+
+.ingredients-section .your-ingredients {
+    font-weight: bold; /* Highlight ingredients user has */
+    color: #155724;
+}
+
+.instructions-section ol li {
+    margin-bottom: 15px;
+    line-height: 1.7;
+    list-style: decimal;
+}
+
+.recipe-actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+    .main-header .container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .main-nav ul {
+        margin-top: 10px;
+        justify-content: center; /* Center nav items on mobile */
+    }
+
+    .hero h1 {
+        font-size: 2.2em;
+    }
+
+    #ingredient-form {
+        flex-direction: column; /* Stack form elements */
+    }
+
+    #ingredient-input {
+        width: 90%;
+    }
+
+    .features-grid, .recipes-grid {
+        grid-template-columns: 1fr; /* Stack cards on mobile */
+    }
+}

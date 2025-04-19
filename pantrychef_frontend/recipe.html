@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <!-- Title will be set dynamically -->
+    <title>Recipe Details - PantryChef</title>
+    <style>
+        /* Add specific styles for loading/error states if needed */
+        #loading-message-recipe { font-style: italic; text-align: center; padding: 20px; }
+        #error-message-recipe { color: red; font-weight: bold; text-align: center; padding: 20px; border: 1px solid red; background-color: #fdd; }
+        /* Style for ingredient list items (optional) */
+        #recipe-ingredients-list li { list-style: disc; margin-left: 25px; }
+        #recipe-instructions-list li { list-style: decimal; margin-left: 25px; }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <a href="index.html" class="logo">PantryChef</a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                     <li><a href="results.html">Back to Results</a></li> <!-- Consider hiding if no previous results exist -->
+                    <li><a href="#">Login</a></li>
+                    <li><a href="#">Sign Up</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Container for dynamic recipe content -->
+        <article class="recipe-detail-container" id="recipe-content-area" style="display: none;"> <!-- Hide initially -->
+            <header class="recipe-detail-header">
+                <h1 id="recipe-title">Recipe Title</h1>
+                <!-- Optional: Description/Summary -->
+                <p id="recipe-summary" style="margin-top: 10px; font-style: italic;"></p>
+            </header>
+
+            <img src="placeholder-recipe-default.jpg" alt="Recipe Image" class="recipe-image-main" id="recipe-image">
+
+            <section class="recipe-meta" id="recipe-meta-info">
+                 <!-- Meta items will be populated by JS -->
+                 <div class="meta-item"><strong >Prep Time</strong><span id="meta-prep-time">-</span></div>
+                 <div class="meta-item"><strong >Cook Time</strong><span id="meta-cook-time">-</span></div>
+                 <div class="meta-item"><strong >Total Time</strong><span id="meta-total-time">-</span></div>
+                 <div class="meta-item"><strong >Servings</strong><span id="meta-servings">-</span></div>
+                 <div class="meta-item"><strong >Source</strong><span id="meta-source">-</span></div>
+                 <!-- Add more meta data like Difficulty, Rating if available -->
+            </section>
+
+            <div class="recipe-content">
+                <section class="ingredients-section">
+                    <h2>Ingredients</h2>
+                    <ul id="recipe-ingredients-list">
+                        <!-- Ingredient items will be populated by JS -->
+                        <li>Loading...</li>
+                    </ul>
+                </section>
+
+                <section class="instructions-section">
+                    <h2>Instructions</h2>
+                    <ol id="recipe-instructions-list">
+                        <!-- Instruction steps will be populated by JS -->
+                         <li>Loading...</li>
+                    </ol>
+                    <p id="instructions-unavailable" style="display: none; color: #666;">Instructions not available for this recipe.</p>
+                </section>
+            </div>
+
+            <section class="recipe-actions">
+                <button class="btn btn-secondary" onclick="window.print();">Print Recipe</button>
+                <!-- Share functionality requires more complex JS -->
+                <button class="btn btn-secondary" onclick="alert('Share function not implemented yet.');">Share</button>
+                 <!-- Save functionality requires user login -->
+                <button class="btn btn-primary" onclick="alert('Save function requires login.');">Save Recipe</button>
+            </section>
+
+        </article>
+
+        <!-- Loading and Error Messages -->
+        <div id="loading-message-recipe" style="display: block;">Loading recipe details...</div>
+        <div id="error-message-recipe" style="display: none;"></div>
+
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>© 2023 PantryChef. All Rights Reserved.</p>
+            <p>
+                <a href="#">Privacy Policy</a> |
+                <a href="#">Terms of Service</a> |
+                <a href="#">Contact</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- **** SCRIPT TO FETCH AND DISPLAY RECIPE DETAILS **** -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const recipeContentArea = document.getElementById('recipe-content-area');
+            const loadingMessage = document.getElementById('loading-message-recipe');
+            const errorMessageElement = document.getElementById('error-message-recipe');
+
+            // --- Helper functions ---
+            function showLoading() {
+                recipeContentArea.style.display = 'none';
+                errorMessageElement.style.display = 'none';
+                loadingMessage.style.display = 'block';
+            }
+
+            function showError(message) {
+                recipeContentArea.style.display = 'none';
+                loadingMessage.style.display = 'none';
+                errorMessageElement.textContent = message;
+                errorMessageElement.style.display = 'block';
+            }
+
+            function showContent() {
+                loadingMessage.style.display = 'none';
+                errorMessageElement.style.display = 'none';
+                recipeContentArea.style.display = 'block';
+            }
+
+            // Function to safely get text or provide a fallback
+            function getText(value, fallback = '-') {
+                return value || fallback;
+            }
+
+            // Function to display the fetched details
+            function displayRecipeDetails(details) {
+                // Update Title and Document Title
+                document.title = `${getText(details.title, 'Recipe Details')} - PantryChef`;
+                document.getElementById('recipe-title').textContent = getText(details.title, 'Recipe Title Unavailable');
+
+                // Update Image
+                const imageElement = document.getElementById('recipe-image');
+                imageElement.src = details.image || 'placeholder-recipe-default.jpg';
+                imageElement.alt = getText(details.title, 'Recipe Image');
+                 imageElement.onerror = function() {
+                    this.onerror=null; this.src='placeholder-recipe-default.jpg'; this.alt='Placeholder Image';
+                 };
+
+                // Update Summary/Description (Spoonacular uses 'summary' which includes HTML)
+                 const summaryElement = document.getElementById('recipe-summary');
+                 if (details.summary) {
+                     summaryElement.innerHTML = details.summary; // Use innerHTML as summary contains HTML tags
+                 } else {
+                     summaryElement.textContent = ''; // Clear if no summary
+                 }
+
+
+                // Update Meta Info
+                document.getElementById('meta-prep-time').textContent = details.preparationMinutes > -1 ? `${details.preparationMinutes} mins` : '-';
+                document.getElementById('meta-cook-time').textContent = details.cookingMinutes > -1 ? `${details.cookingMinutes} mins` : '-';
+                document.getElementById('meta-total-time').textContent = details.readyInMinutes > -1 ? `${details.readyInMinutes} mins` : '-';
+                document.getElementById('meta-servings').textContent = getText(details.servings);
+                // Create a link for the source if URL exists
+                const sourceElement = document.getElementById('meta-source');
+                if (details.sourceUrl) {
+                     sourceElement.innerHTML = `<a href="${details.sourceUrl}" target="_blank" rel="noopener noreferrer">${getText(details.sourceName, 'Original Source')}</a>`;
+                } else {
+                    sourceElement.textContent = getText(details.sourceName, '-');
+                }
+
+
+                // Update Ingredients List
+                const ingredientsList = document.getElementById('recipe-ingredients-list');
+                ingredientsList.innerHTML = ''; // Clear loading/previous items
+                if (details.extendedIngredients && details.extendedIngredients.length > 0) {
+                    details.extendedIngredients.forEach(ing => {
+                        const li = document.createElement('li');
+                        // Use original string for display (includes amount, unit, name)
+                        li.textContent = ing.original || `${ing.amount} ${ing.unit} ${ing.name}`;
+                        ingredientsList.appendChild(li);
+                    });
+                } else {
+                    ingredientsList.innerHTML = '<li>Ingredients not available.</li>';
+                }
+
+                // Update Instructions List
+                const instructionsList = document.getElementById('recipe-instructions-list');
+                const instructionsUnavailable = document.getElementById('instructions-unavailable');
+                instructionsList.innerHTML = ''; // Clear loading/previous items
+                instructionsUnavailable.style.display = 'none'; // Hide unavailable message initially
+
+                // Instructions can be in 'analyzedInstructions' (structured) or 'instructions' (plain text/HTML)
+                let instructionsFound = false;
+                if (details.analyzedInstructions && details.analyzedInstructions.length > 0) {
+                     // Prefer structured instructions
+                     details.analyzedInstructions.forEach(instructionSet => {
+                         if (instructionSet.steps && instructionSet.steps.length > 0) {
+                             instructionSet.steps.forEach(step => {
+                                 const li = document.createElement('li');
+                                 li.textContent = step.step;
+                                 instructionsList.appendChild(li);
+                                 instructionsFound = true;
+                             });
+                         }
+                     });
+                }
+
+                // Fallback to plain text instructions if structured ones aren't useful
+                if (!instructionsFound && details.instructions) {
+                    // Treat instructions as potentially HTML or plain text with newlines
+                    const instructionBlob = details.instructions;
+                    // Simple approach: Split by newline if no HTML tags seem present, otherwise insert as HTML
+                    if (instructionBlob.includes('<') || instructionBlob.includes('>')) {
+                         const li = document.createElement('li');
+                         li.innerHTML = instructionBlob; // Insert as HTML
+                         instructionsList.appendChild(li);
+                    } else {
+                         // Split by newline characters
+                         instructionBlob.split('\n').forEach(line => {
+                             if (line.trim()) { // Only add non-empty lines
+                                 const li = document.createElement('li');
+                                 li.textContent = line.trim();
+                                 instructionsList.appendChild(li);
+                             }
+                         });
+                    }
+                     instructionsFound = true;
+                }
+
+                if (!instructionsFound) {
+                    instructionsUnavailable.style.display = 'block'; // Show unavailable message
+                }
+
+                showContent(); // Make the populated content area visible
+            }
+
+
+            // --- Main Execution Logic ---
+            async function fetchAndDisplayRecipe() {
+                showLoading();
+
+                // 1. Get Recipe ID from URL query parameter (?id=...)
+                const urlParams = new URLSearchParams(window.location.search);
+                const recipeId = urlParams.get('id');
+
+                if (!recipeId) {
+                    showError('No recipe ID found in the URL. Cannot load details.');
+                    console.error("Recipe ID missing from URL query parameters.");
+                    return;
+                }
+
+                // 2. Construct the backend API URL
+                const apiUrl = `http://127.0.0.1:5001/api/recipe-details/${recipeId}`;
+
+                // 3. Fetch data from backend
+                try {
+                    const response = await fetch(apiUrl);
+                    const data = await response.json(); // Always try to parse JSON
+
+                    if (!response.ok) {
+                         // Use error message from backend JSON if available
+                        throw new Error(data.error || `Failed to fetch recipe details (Status: ${response.status})`);
+                    }
+
+                    // 4. Display the data
+                    displayRecipeDetails(data);
+
+                } catch (error) {
+                    console.error("Error fetching or displaying recipe details:", error);
+                    showError(`Could not load recipe: ${error.message}`);
+                }
+            }
+
+            // Run the function to fetch and display data when the page loads
+            fetchAndDisplayRecipe();
+
+        }); // End of DOMContentLoaded
+    </script>
+    <!-- **** END OF SCRIPT **** -->
+
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Recipe Results - PantryChef</title>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <a href="index.html" class="logo">PantryChef</a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="index.html#how-it-works">How It Works</a></li>
+                    <li><a href="#">Login</a></li>
+                    <li><a href="#">Sign Up</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="results-header">
+        <div class="container">
+            <h1>Recipe Suggestions</h1>
+            <!-- This paragraph will be updated by JavaScript -->
+            <p>Loading results...</p>
+        </div>
+    </section>
+
+    <main class="container">
+        <!-- Placeholder for potential filter/sort controls in the future -->
+        <!--
+        <section class="filter-sort-section">
+            <label for="sort-by">Sort By:</label>
+            <select id="sort-by" name="sort"> ... </select>
+        </section>
+        -->
+
+        <section class="recipes-grid">
+            <!-- Recipe cards will be dynamically inserted here -->
+            <p>Loading recipes...</p> <!-- Initial placeholder -->
+        </section>
+
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+             <p>© 2023 PantryChef. All Rights Reserved.</p>
+            <p>
+                <a href="#">Privacy Policy</a> |
+                <a href="#">Terms of Service</a> |
+                <a href="#">Contact</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- **** START OF MODIFIED SCRIPT BLOCK **** -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const resultsGrid = document.querySelector('.recipes-grid');
+            const resultsHeaderP = document.querySelector('.results-header p');
+
+            // --- Helper Functions ---
+            function displaySearchedIngredients(ingredientsArray) {
+                if (resultsHeaderP && ingredientsArray && ingredientsArray.length > 0) {
+                    // Sanitize ingredient names briefly before display (optional)
+                    const cleanIngredients = ingredientsArray.map(ing => ing.replace(/</g, "<").replace(/>/g, ">"));
+                    resultsHeaderP.innerHTML = `Showing results for: <strong>${cleanIngredients.join(', ')}</strong>`;
+                } else if (resultsHeaderP) {
+                    resultsHeaderP.textContent = 'Displaying recipe results.';
+                }
+            }
+
+            // --- NEW: Helper function to create card ---
+            function createAndAppendCard(recipe) {
+                 const card = document.createElement('div');
+                 card.className = 'recipe-card';
+
+                 const img = document.createElement('img');
+                 // Use a default placeholder image path if recipe.image is missing
+                 const imageUrl = recipe.image || 'placeholder-recipe-default.jpg';
+                 img.src = imageUrl;
+                 img.alt = recipe.title || 'Recipe image';
+                 // Add an error handler for broken image links
+                 img.onerror = function() {
+                     this.onerror=null; // prevent infinite loops if the placeholder also fails
+                     this.src='placeholder-recipe-default.jpg'; // Make sure you have a placeholder image at this path
+                     this.alt='Placeholder Image';
+                  };
+
+                 const title = document.createElement('h3');
+                 title.textContent = recipe.title || 'Untitled Recipe';
+
+                 const description = document.createElement('p');
+                 // Construct description with used/missed counts and first few ingredients
+                 let usedText = `<strong>Uses ${recipe.usedIngredientCount || 0}:</strong> `;
+                 if (recipe.usedIngredients && recipe.usedIngredients.length > 0) {
+                     // Show first 3 used ingredients, add '...' if more exist
+                     usedText += recipe.usedIngredients.slice(0, 3).join(', ') + (recipe.usedIngredients.length > 3 ? '...' : '');
+                 } else {
+                     usedText += 'N/A'; // Indicate if none are used (shouldn't happen often with ranking 1)
+                 }
+
+                 let missedText = `<strong>Needs ${recipe.missedIngredientCount || 0}:</strong> `;
+                  if (recipe.missedIngredients && recipe.missedIngredients.length > 0) {
+                     // Show first 3 missing ingredients, add '...' if more exist
+                     missedText += recipe.missedIngredients.slice(0, 3).join(', ') + (recipe.missedIngredients.length > 3 ? '...' : '');
+                 } else {
+                     missedText += 'None!'; // Indicate if no ingredients are missing
+                 }
+                 description.innerHTML = `${usedText} <br> ${missedText}`;
+
+
+                 const viewButton = document.createElement('a');
+                 // Link to a future recipe detail page, passing the recipe ID
+                 viewButton.href = `recipe.html?id=${recipe.id}`; // Make sure recipe.id is valid
+                 viewButton.className = 'btn btn-secondary';
+                 viewButton.style.marginTop = '10px';
+                 viewButton.textContent = 'View Recipe';
+
+                 // Append all parts to the card
+                 card.appendChild(img);
+                 card.appendChild(title);
+                 card.appendChild(description);
+                 card.appendChild(viewButton);
+
+                 // Append the completed card to the grid, checking if grid exists
+                 if(resultsGrid) {
+                    resultsGrid.appendChild(card);
+                 } else {
+                    console.error("Cannot append card, resultsGrid element not found!");
+                 }
+            }
+            // --- END NEW HELPER ---
+
+
+            // --- MODIFIED: Function to display recipes with filtering/sorting ---
+            function displayRecipeCards(recipes) {
+                if (!resultsGrid) {
+                    console.error("Could not find .recipes-grid element");
+                    return;
+                 }
+
+                resultsGrid.innerHTML = ''; // Clear loading message or previous results
+
+                if (!recipes || recipes.length === 0) {
+                    resultsGrid.innerHTML = '<p>No recipes were returned from the server. Try searching again with different ingredients, or check if the backend server is running correctly.</p>';
+                    return;
+                }
+
+                // --- Filtering and Sorting Logic ---
+                const searchedIngredientsString = sessionStorage.getItem('searchedIngredients') || '';
+                const numberOfSearchedIngredients = searchedIngredientsString.split(',').filter(ing => ing.trim() !== '').length;
+
+                // Define minimum ingredients a recipe must use from the user's input
+                // Example: At least 1, but ideally 2 if user provided 2 or more. Adjust as needed.
+                const minimumIngredientsToUse = Math.max(1, Math.min(numberOfSearchedIngredients, 2));
+
+                // Filter recipes: Keep only those using >= minimumIngredientsToUse
+                const filteredRecipes = recipes.filter(recipe => (recipe.usedIngredientCount || 0) >= minimumIngredientsToUse);
+
+                // Sort the filtered recipes:
+                // 1. Higher usedIngredientCount first (descending)
+                // 2. Lower missedIngredientCount first (ascending) as tie-breaker
+                filteredRecipes.sort((a, b) => {
+                    const usedCompare = (b.usedIngredientCount || 0) - (a.usedIngredientCount || 0);
+                    if (usedCompare !== 0) {
+                        return usedCompare;
+                    }
+                    return (a.missedIngredientCount || 0) - (b.missedIngredientCount || 0);
+                });
+                // --- End Filtering and Sorting ---
+
+
+                // Check if any recipes remain after filtering
+                if (filteredRecipes.length === 0) {
+                     resultsGrid.innerHTML = `<p>No recipes found using at least ${minimumIngredientsToUse} of your ingredients. Showing initial results below sorted by relevance (or try a different search).</p>`;
+
+                     // Fallback: Sort and display the original unfiltered list if filtering removed everything
+                     console.warn("Filtering removed all recipes. Displaying original results sorted.");
+                     recipes.sort((a, b) => { // Apply sorting to original results
+                        const usedCompare = (b.usedIngredientCount || 0) - (a.usedIngredientCount || 0);
+                        if (usedCompare !== 0) return usedCompare;
+                        return (a.missedIngredientCount || 0) - (b.missedIngredientCount || 0);
+                     });
+                     recipes.forEach(recipe => { // Iterate original list
+                       createAndAppendCard(recipe); // Use the helper function
+                     });
+
+                } else {
+                   // Display the filtered and sorted recipes
+                   console.log(`Displaying ${filteredRecipes.length} filtered recipes.`);
+                   filteredRecipes.forEach(recipe => {
+                       createAndAppendCard(recipe); // Use the helper function
+                   });
+                }
+            }
+            // --- END MODIFIED displayRecipeCards ---
+
+
+            // --- Main Logic (Runs on page load) ---
+            const resultsDataString = sessionStorage.getItem('recipeResults');
+            const searchedIngredientsString = sessionStorage.getItem('searchedIngredients');
+
+            if (!resultsDataString) {
+                // Handle case where user navigated directly to results.html without searching
+                if(resultsGrid) {
+                   resultsGrid.innerHTML = '<p>No results to display. Please <a href="index.html">start a search</a> first.</p>';
+                }
+                if(resultsHeaderP) {
+                    resultsHeaderP.textContent = 'Please start a search on the homepage.';
+                }
+                console.warn("No recipe results found in sessionStorage.");
+                return; // Stop further execution
+            }
+
+            try {
+                 // Parse the stored JSON strings back into JavaScript objects/arrays
+                const recipeResults = JSON.parse(resultsDataString);
+                const searchedIngredients = searchedIngredientsString ? searchedIngredientsString.split(',') : [];
+
+                // Update UI elements
+                displaySearchedIngredients(searchedIngredients); // Update header text
+                displayRecipeCards(recipeResults); // Display the recipe cards (with filtering/sorting)
+
+                 // Optional: Clear storage after use if desired
+                 // sessionStorage.removeItem('recipeResults');
+                 // sessionStorage.removeItem('searchedIngredients');
+
+            } catch (error) {
+                 // Handle errors during JSON parsing or display
+                 console.error("Error parsing or displaying results:", error);
+                 if(resultsGrid) {
+                    resultsGrid.innerHTML = '<p>An error occurred while displaying recipes. Please try searching again.</p>';
+                 }
+                 if(resultsHeaderP) {
+                     resultsHeaderP.textContent = 'Error loading results.';
+                 }
+            }
+
+        }); // End of DOMContentLoaded
+    </script>
+    <!-- **** END OF MODIFIED SCRIPT BLOCK **** -->
+
+</body>
+</html>
